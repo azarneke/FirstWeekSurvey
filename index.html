@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>First Week Survey - STAT Courses</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f4f8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .survey-card {
+            background: white;
+            max-width: 700px;
+            width: 100%;
+            padding: 35px 40px;
+            border-radius: 24px;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+            transition: 0.2s;
+        }
+        h1 {
+            font-size: 1.9rem;
+            color: #1e293b;
+            border-left: 6px solid #2563eb;
+            padding-left: 18px;
+            margin-bottom: 6px;
+        }
+        .subhead {
+            color: #475569;
+            margin-left: 24px;
+            margin-bottom: 28px;
+            font-size: 0.95rem;
+        }
+        .form-group {
+            margin-bottom: 24px;
+        }
+        label {
+            display: block;
+            font-weight: 600;
+            color: #0f172a;
+            margin-bottom: 6px;
+            font-size: 0.95rem;
+        }
+        label .required {
+            color: #b91c1c;
+            margin-left: 4px;
+        }
+        select, textarea {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1.5px solid #d1d5db;
+            border-radius: 14px;
+            font-size: 1rem;
+            background: #fafcff;
+            transition: 0.2s;
+            font-family: inherit;
+        }
+        select:focus, textarea:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+            background: white;
+        }
+        .question-item {
+            background: #f8fafc;
+            padding: 16px 18px;
+            border-radius: 16px;
+            margin-bottom: 14px;
+            border: 1px solid #e9edf2;
+        }
+        .question-item p {
+            font-weight: 500;
+            color: #0f172a;
+            margin-bottom: 10px;
+        }
+        .rating-group {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .rating-group label {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-weight: 400;
+            font-size: 0.95rem;
+            color: #1e293b;
+            cursor: pointer;
+            background: white;
+            padding: 4px 12px 4px 8px;
+            border-radius: 40px;
+            border: 1px solid transparent;
+            transition: 0.1s;
+        }
+        .rating-group label:hover {
+            background: #e2e8f0;
+        }
+        .rating-group input[type="radio"] {
+            width: 17px;
+            height: 17px;
+            accent-color: #2563eb;
+            cursor: pointer;
+        }
+        .comment-box {
+            margin-top: 6px;
+        }
+        .comment-box textarea {
+            min-height: 90px;
+            resize: vertical;
+        }
+        .submit-btn {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            border-radius: 40px;
+            width: 100%;
+            cursor: pointer;
+            transition: 0.15s;
+            letter-spacing: 0.3px;
+            margin-top: 8px;
+        }
+        .submit-btn:hover {
+            background: #1d4ed8;
+            transform: scale(1.01);
+            box-shadow: 0 6px 16px rgba(37, 99, 235, 0.3);
+        }
+        .submit-btn:active {
+            transform: scale(0.97);
+        }
+        .footer-note {
+            margin-top: 18px;
+            font-size: 0.8rem;
+            color: #64748b;
+            text-align: center;
+        }
+        hr {
+            border: none;
+            border-top: 2px dashed #d1d9e6;
+            margin: 12px 0 22px 0;
+        }
+        @media (max-width: 500px) {
+            .survey-card { padding: 22px 16px; }
+            .rating-group { gap: 6px; }
+            .rating-group label { padding: 4px 8px 4px 4px; font-size: 0.85rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="survey-card">
+    <h1>📊 First‑Week Pulse</h1>
+    <div class="subhead">STAT 353 · 360 · 415 — anonymous feedback for professor</div>
+    <hr>
+
+    <form id="surveyForm">
+        <!-- DROP DOWN: Class Selection -->
+        <div class="form-group">
+            <label for="classSelect">Select your course <span class="required">*</span></label>
+            <select id="classSelect" required>
+                <option value="">— Please choose —</option>
+                <option value="STAT 353">STAT 353</option>
+                <option value="STAT 360">STAT 360</option>
+                <option value="STAT 415">STAT 415</option>
+            </select>
+        </div>
+
+        <!-- SURVEY QUESTIONS (6 items) -->
+        <div id="questionsContainer">
+            <!-- Q1 -->
+            <div class="question-item">
+                <p>1. Is this class what you were expecting after the first week?</p>
+                <div class="rating-group">
+                    <label><input type="radio" name="q1" value="1" required> 1 (Not at all)</label>
+                    <label><input type="radio" name="q1" value="2"> 2</label>
+                    <label><input type="radio" name="q1" value="3"> 3 (Neutral)</label>
+                    <label><input type="radio" name="q1" value="4"> 4</label>
+                    <label><input type="radio" name="q1" value="5"> 5 (Exactly)</label>
+                </div>
+            </div>
+
+            <!-- Q2 -->
+            <div class="question-item">
+                <p>2. How does the difficulty compare to what you anticipated?</p>
+                <div class="rating-group">
+                    <label><input type="radio" name="q2" value="1" required> 1 (Much easier)</label>
+                    <label><input type="radio" name="q2" value="2"> 2</label>
+                    <label><input type="radio" name="q2" value="3"> 3 (About right)</label>
+                    <label><input type="radio" name="q2" value="4"> 4</label>
+                    <label><input type="radio" name="q2" value="5"> 5 (Much harder)</label>
+                </div>
+            </div>
+
+            <!-- Q3 -->
+            <div class="question-item">
+                <p>3. Will you need to put in <strong>more</strong> time outside of class than you initially thought?</p>
+                <div class="rating-group">
+                    <label><input type="radio" name="q3" value="1" required> 1 (Much less)</label>
+                    <label><input type="radio" name="q3" value="2"> 2</label>
+                    <label><input type="radio" name="q3" value="3"> 3 (Same as thought)</label>
+                    <label><input type="radio" name="q3" value="4"> 4</label>
+                    <label><input type="radio" name="q3" value="5"> 5 (Much more)</label>
+                </div>
+            </div>
+
+            <!-- Q4 -->
+            <div class="question-item">
+                <p>4. How clear were the expectations for this class (syllabus, assignments, grading)?</p>
+                <div class="rating-group">
+                    <label><input type="radio" name="q4" value="1" required> 1 (Very unclear)</label>
+                    <label><input type="radio" name="q4" value="2"> 2</label>
+                    <label><input type="radio" name="q4" value="3"> 3 (Moderate)</label>
+                    <label><input type="radio" name="q4" value="4"> 4</label>
+                    <label><input type="radio" name="q4" value="5"> 5 (Very clear)</label>
+                </div>
+            </div>
+
+            <!-- Q5 -->
+            <div class="question-item">
+                <p>5. Do you feel the pace of the first week is appropriate?</p>
+                <div class="rating-group">
+                    <label><input type="radio" name="q5" value="1" required> 1 (Too slow)</label>
+                    <label><input type="radio" name="q5" value="2"> 2</label>
+                    <label><input type="radio" name="q5" value="3"> 3 (Just right)</label>
+                    <label><input type="radio" name="q5" value="4"> 4</label>
+                    <label><input type="radio" name="q5" value="5"> 5 (Too fast)</label>
+                </div>
+            </div>
+
+            <!-- Q6 (extra: engagement / interest) -->
+            <div class="question-item">
+                <p>6. How engaged or interested are you in the material so far?</p>
+                <div class="rating-group">
+                    <label><input type="radio" name="q6" value="1" required> 1 (Not at all)</label>
+                    <label><input type="radio" name="q6" value="2"> 2</label>
+                    <label><input type="radio" name="q6" value="3"> 3 (Neutral)</label>
+                    <label><input type="radio" name="q6" value="4"> 4</label>
+                    <label><input type="radio" name="q6" value="5"> 5 (Very engaged)</label>
+                </div>
+            </div>
+        </div>
+
+        <!-- COMMENT BOX -->
+        <div class="form-group comment-box">
+            <label for="comment">Additional comments (optional)</label>
+            <textarea id="comment" placeholder="Any specific feedback about the first week..."></textarea>
+        </div>
+
+        <button type="submit" class="submit-btn">📩 Submit &amp; View Results</button>
+        <div class="footer-note">Results will appear in the browser console (F12). Copy them for your professor.</div>
+    </form>
+</div>
+
+<script>
+    (function() {
+        const form = document.getElementById('surveyForm');
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            // 1. Get class
+            const classSelect = document.getElementById('classSelect');
+            const selectedClass = classSelect.value;
+            if (!selectedClass) {
+                alert('Please select a class from the dropdown.');
+                return;
+            }
+
+            // 2. Gather radio answers
+            const questionNames = ['q1', 'q2', 'q3', 'q4', 'q5', 'q6'];
+            const answers = {};
+            let allAnswered = true;
+
+            questionNames.forEach((qName) => {
+                const radios = document.querySelectorAll(`input[name="${qName}"]`);
+                let selectedValue = null;
+                for (let radio of radios) {
+                    if (radio.checked) {
+                        selectedValue = radio.value;
+                        break;
+                    }
+                }
+                if (selectedValue === null) {
+                    allAnswered = false;
+                }
+                answers[qName] = selectedValue;
+            });
+
+            if (!allAnswered) {
+                alert('Please answer all 6 rating questions before submitting.');
+                return;
+            }
+
+            // 3. Get comment
+            const comment = document.getElementById('comment').value.trim();
+
+            // 4. Build result object
+            const result = {
+                class: selectedClass,
+                timestamp: new Date().toLocaleString(),
+                questions: {
+                    q1_expectations: answers.q1,
+                    q2_difficulty_vs_expected: answers.q2,
+                    q3_more_time_outside: answers.q3,
+                    q4_clarity_expectations: answers.q4,
+                    q5_pace_appropriateness: answers.q5,
+                    q6_engagement: answers.q6
+                },
+                comment: comment || '(no comment)'
+            };
+
+            // 5. Output to console (beautifully)
+            console.log('%c📋 SURVEY RESPONSE — FIRST WEEK', 'font-size:16px; font-weight:bold; background:#1e293b; color:white; padding:6px 12px; border-radius:6px;');
+            console.log(`%cClass: ${result.class}`, 'font-weight:bold; color:#2563eb;');
+            console.log(`%cTime: ${result.timestamp}`, 'color:#475569;');
+            console.table(result.questions);
+            console.log(`%c💬 Comment: ${result.comment}`, 'font-style:italic; color:#0f172a;');
+            console.log('%c— — — — — — — — — — — — — — — — —', 'color:#94a3b8;');
+
+            // Also show a user-friendly alert with a summary
+            const summary = `
+        ✅ Survey submitted for ${result.class}
+
+        Q1 (Expectations): ${result.questions.q1_expectations}/5
+        Q2 (Difficulty):   ${result.questions.q2_difficulty_vs_expected}/5
+        Q3 (More time):    ${result.questions.q3_more_time_outside}/5
+        Q4 (Clarity):      ${result.questions.q4_clarity_expectations}/5
+        Q5 (Pace):         ${result.questions.q5_pace_appropriateness}/5
+        Q6 (Engagement):   ${result.questions.q6_engagement}/5
+
+        📝 Comment: ${result.comment}
+
+        💡 Open the browser console (F12) to copy the full table.
+            `;
+            alert(summary);
+
+            // Optionally reset the form? (uncomment if you want)
+            // form.reset();
+        });
+
+    })();
+</script>
+
+</body>
+</html>
