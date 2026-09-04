@@ -267,25 +267,26 @@
 <script>
     (function() {
         const form = document.getElementById('surveyForm');
-
+        
         // ============================================================
-        // 🔑 ADD YOUR WEB APP URL HERE - Replace with your actual URL
+        // 🔑 REPLACE THIS URL WITH YOUR ACTUAL WEB APP URL
         // ============================================================
         const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzaDNreca2kk4h9CXUKeOAo4gAyhLdbIsN9X1A2UGHnQ5e20JUF_EKhEYpsF-5iXK6H/exec';
         // ============================================================
 
         form.addEventListener('submit', function(e) {
             e.preventDefault();
-
-            // 1. Get class
+            
+            // Get class selection
             const classSelect = document.getElementById('classSelect');
             const selectedClass = classSelect.value;
+            
             if (!selectedClass) {
                 alert('Please select a class from the dropdown.');
                 return;
             }
 
-            // 2. Gather radio answers
+            // Gather radio answers
             const questionNames = ['q1', 'q2', 'q3', 'q4', 'q5', 'q6'];
             const answers = {};
             let allAnswered = true;
@@ -310,13 +311,12 @@
                 return;
             }
 
-            // 3. Get comment
+            // Get comment
             const comment = document.getElementById('comment').value.trim();
 
-            // 4. Build result object
-            const result = {
+            // Build data object
+            const data = {
                 class: selectedClass,
-                timestamp: new Date().toLocaleString(),
                 questions: {
                     q1_expectations: answers.q1,
                     q2_difficulty_vs_expected: answers.q2,
@@ -328,37 +328,75 @@
                 comment: comment || '(no comment)'
             };
 
-            // 5. Output to console (beautifully)
-            console.log('%c📋 SURVEY RESPONSE — FIRST WEEK', 'font-size:16px; font-weight:bold; background:#1e293b; color:white; padding:6px 12px; border-radius:6px;');
-            console.log(`%cClass: ${result.class}`, 'font-weight:bold; color:#2563eb;');
-            console.log(`%cTime: ${result.timestamp}`, 'color:#475569;');
-            console.table(result.questions);
-            console.log(`%c💬 Comment: ${result.comment}`, 'font-style:italic; color:#0f172a;');
-            console.log('%c— — — — — — — — — — — — — — — — —', 'color:#94a3b8;');
+            // Log the data to console for debugging
+            console.log('📤 Sending data:', data);
+            console.log('📤 To URL:', WEB_APP_URL);
 
-            // Also show a user-friendly alert with a summary
-            const summary = `
-        ✅ Survey submitted for ${result.class}
+            // Send data to Google Sheets
+            const submitBtn = form.querySelector('.submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = '⏳ Sending...';
 
-        Q1 (Expectations): ${result.questions.q1_expectations}/5
-        Q2 (Difficulty):   ${result.questions.q2_difficulty_vs_expected}/5
-        Q3 (More time):    ${result.questions.q3_more_time_outside}/5
-        Q4 (Clarity):      ${result.questions.q4_clarity_expectations}/5
-        Q5 (Pace):         ${result.questions.q5_pace_appropriateness}/5
-        Q6 (Engagement):   ${result.questions.q6_engagement}/5
-
-        📝 Comment: ${result.comment}
-
-        💡 Open the browser console (F12) to copy the full table.
-            `;
-            alert(summary);
-
-            // Optionally reset the form? (uncomment if you want)
-            // form.reset();
+            // Try using fetch without no-cors first
+            fetch(WEB_APP_URL, {
+                method: 'POST',
+                mode: 'cors', // Changed from 'no-cors' to 'cors'
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => {
+                console.log('📥 Response status:', response.status);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(result => {
+                console.log('✅ Success:', result);
+                if (result.success) {
+                    alert('✅ Survey submitted successfully! Thank you for your feedback.');
+                    form.reset();
+                } else {
+                    alert('❌ Error: ' + (result.error || 'Unknown error occurred'));
+                }
+                submitBtn.disabled = false;
+                submitBtn.textContent = '📩 Submit Survey';
+            })
+            .catch((error) => {
+                console.error('❌ Fetch error:', error);
+                
+                // If CORS error, try with no-cors as fallback
+                if (error.message.includes('CORS')) {
+                    console.log('🔄 Trying with no-cors mode...');
+                    fetch(WEB_APP_URL, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(data)
+                    })
+                    .then(() => {
+                        alert('✅ Survey submitted successfully! (No response data available)');
+                        form.reset();
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = '📩 Submit Survey';
+                    })
+                    .catch((fallbackError) => {
+                        alert('❌ Error submitting survey. Please try again.\n\nError: ' + fallbackError.message);
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = '📩 Submit Survey';
+                    });
+                } else {
+                    alert('❌ Error submitting survey. Please try again.\n\nError: ' + error.message);
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = '📩 Submit Survey';
+                }
+            });
         });
-
     })();
 </script>
-
 </body>
 </html>
