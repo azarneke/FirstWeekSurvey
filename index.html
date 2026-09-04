@@ -380,24 +380,21 @@
             submitBtn.disabled = true;
             submitBtn.textContent = '⏳ Sending...';
 
-            // 6. Send data using no-cors mode (THIS IS THE KEY FOR GITHUB PAGES)
+            // 6. Send data using no-cors mode
             fetch(WEB_APP_URL, {
                 method: 'POST',
-                mode: 'no-cors',  // This is required for GitHub Pages
+                mode: 'no-cors',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify(data)
             })
             .then(() => {
-                // With no-cors, we can't read the response, but the request was sent
-                console.log('✅ Request sent successfully (no-cors mode)');
+                console.log('✅ Request sent successfully');
                 successMessage.style.display = 'block';
                 form.reset();
                 submitBtn.disabled = false;
                 submitBtn.textContent = '📩 Submit Survey';
-                
-                // Scroll to top to show success message
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             })
             .catch((error) => {
@@ -410,6 +407,3 @@
         });
     })();
 </script>
-
-</body>
-</html>
