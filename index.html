@@ -361,7 +361,7 @@
             // 3. Get comment
             const comment = document.getElementById('comment').value.trim();
 
-            // 4. Build data object (EXACTLY like the test function expects)
+            // 4. Build data object
             const data = {
                 class: selectedClass,
                 questions: {
@@ -375,7 +375,7 @@
                 comment: comment || '(no comment)'
             };
 
-            console.log('📤 Sending data:', JSON.stringify(data, null, 2));
+            console.log('📤 Sending data:', data);
             console.log('📤 To URL:', WEB_APP_URL);
 
             // 5. Disable submit button
@@ -383,69 +383,32 @@
             submitBtn.disabled = true;
             submitBtn.textContent = '⏳ Sending...';
 
-            // 6. Send data using fetch with proper CORS handling
+            // 6. Send data using no-cors mode (THIS IS THE KEY FOR GITHUB PAGES)
             fetch(WEB_APP_URL, {
                 method: 'POST',
+                mode: 'no-cors',  // This is required for GitHub Pages
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify(data)
             })
-            .then(response => {
-                console.log('📥 Response status:', response.status);
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(result => {
-                console.log('✅ Success response:', result);
-                if (result.success) {
-                    successMessage.style.display = 'block';
-                    form.reset();
-                } else {
-                    errorMessage.textContent = '❌ Error: ' + (result.error || 'Unknown error');
-                    errorMessage.style.display = 'block';
-                }
+            .then(() => {
+                // With no-cors, we can't read the response, but the request was sent
+                console.log('✅ Request sent successfully (no-cors mode)');
+                successMessage.style.display = 'block';
+                form.reset();
                 submitBtn.disabled = false;
                 submitBtn.textContent = '📩 Submit Survey';
+                
+                // Scroll to top to show success message
+                window.scrollTo({ top: 0, behavior: 'smooth' });
             })
             .catch((error) => {
-                console.error('❌ Fetch error:', error);
-                
-                // If CORS error, try with no-cors as fallback
-                if (error.message.includes('CORS') || error.message.includes('fetch')) {
-                    console.log('🔄 Trying no-cors mode as fallback...');
-                    
-                    fetch(WEB_APP_URL, {
-                        method: 'POST',
-                        mode: 'no-cors',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(data)
-                    })
-                    .then(() => {
-                        // With no-cors, we can't read the response, but the request was sent
-                        console.log('✅ Request sent with no-cors');
-                        successMessage.style.display = 'block';
-                        form.reset();
-                        submitBtn.disabled = false;
-                        submitBtn.textContent = '📩 Submit Survey';
-                    })
-                    .catch((fallbackError) => {
-                        console.error('❌ Fallback error:', fallbackError);
-                        errorMessage.textContent = '❌ Error: ' + fallbackError.message;
-                        errorMessage.style.display = 'block';
-                        submitBtn.disabled = false;
-                        submitBtn.textContent = '📩 Submit Survey';
-                    });
-                } else {
-                    errorMessage.textContent = '❌ Error: ' + error.message;
-                    errorMessage.style.display = 'block';
-                    submitBtn.disabled = false;
-                    submitBtn.textContent = '📩 Submit Survey';
-                }
+                console.error('❌ Error:', error);
+                errorMessage.textContent = '❌ Error submitting survey. Please try again.';
+                errorMessage.style.display = 'block';
+                submitBtn.disabled = false;
+                submitBtn.textContent = '📩 Submit Survey';
             });
         });
     })();
