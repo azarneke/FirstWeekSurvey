@@ -26,7 +26,6 @@
             padding: 35px 40px;
             border-radius: 24px;
             box-shadow: 0 12px 30px rgba(0,0,0,0.15);
-            transition: 0.2s;
         }
         h1 {
             font-size: 1.9rem;
@@ -141,6 +140,11 @@
         .submit-btn:active {
             transform: scale(0.97);
         }
+        .submit-btn:disabled {
+            background: #94a3b8;
+            cursor: not-allowed;
+            transform: none;
+        }
         .footer-note {
             margin-top: 18px;
             font-size: 0.8rem;
@@ -151,6 +155,28 @@
             border: none;
             border-top: 2px dashed #d1d9e6;
             margin: 12px 0 22px 0;
+        }
+        .success-message {
+            display: none;
+            background: #dcfce7;
+            color: #166534;
+            padding: 16px;
+            border-radius: 12px;
+            border: 1px solid #86efac;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 500;
+        }
+        .error-message {
+            display: none;
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 16px;
+            border-radius: 12px;
+            border: 1px solid #fca5a5;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 500;
         }
         @media (max-width: 500px) {
             .survey-card { padding: 22px 16px; }
@@ -165,6 +191,13 @@
     <h1>📊 First‑Week Pulse</h1>
     <div class="subhead">STAT 353 · 360 · 415 — anonymous feedback for professor</div>
     <hr>
+    
+    <div id="successMessage" class="success-message">
+        ✅ Survey submitted successfully! Thank you for your feedback.
+    </div>
+    <div id="errorMessage" class="error-message">
+        ❌ Error submitting survey. Please try again.
+    </div>
 
     <form id="surveyForm">
         <!-- DROP DOWN: Class Selection -->
@@ -178,7 +211,7 @@
             </select>
         </div>
 
-        <!-- SURVEY QUESTIONS (6 items) -->
+        <!-- SURVEY QUESTIONS -->
         <div id="questionsContainer">
             <!-- Q1 -->
             <div class="question-item">
@@ -240,7 +273,7 @@
                 </div>
             </div>
 
-            <!-- Q6 (extra: engagement / interest) -->
+            <!-- Q6 -->
             <div class="question-item">
                 <p>6. How engaged or interested are you in the material so far?</p>
                 <div class="rating-group">
@@ -259,34 +292,48 @@
             <textarea id="comment" placeholder="Any specific feedback about the first week..."></textarea>
         </div>
 
-        <button type="submit" class="submit-btn">📩 Submit &amp; View Results</button>
-        <div class="footer-note">Results will appear in the browser console (F12). Copy them for your professor.</div>
+        <button type="submit" class="submit-btn">📩 Submit Survey</button>
+        <div class="footer-note">Your responses will be saved to Google Sheets</div>
     </form>
 </div>
 
 <script>
     (function() {
         const form = document.getElementById('surveyForm');
+        const successMessage = document.getElementById('successMessage');
+        const errorMessage = document.getElementById('errorMessage');
         
         // ============================================================
         // 🔑 REPLACE THIS URL WITH YOUR ACTUAL WEB APP URL
         // ============================================================
+        // Your URL should look like:
+        // https://script.google.com/macros/s/ABCDEFGHIJKLMNOPQRSTUVWXYZ/exec
+        // ============================================================
         const WEB_APP_URL = 'https://script.google.com/macros/s/YOUR-ACTUAL-URL/exec';
         // ============================================================
+
+        // Hide messages when user starts interacting
+        form.addEventListener('change', function() {
+            successMessage.style.display = 'none';
+            errorMessage.style.display = 'none';
+        });
 
         form.addEventListener('submit', function(e) {
             e.preventDefault();
             
-            // Get class selection
+            // Hide previous messages
+            successMessage.style.display = 'none';
+            errorMessage.style.display = 'none';
+
+            // 1. Get class
             const classSelect = document.getElementById('classSelect');
             const selectedClass = classSelect.value;
-            
             if (!selectedClass) {
                 alert('Please select a class from the dropdown.');
                 return;
             }
 
-            // Gather radio answers
+            // 2. Gather radio answers
             const questionNames = ['q1', 'q2', 'q3', 'q4', 'q5', 'q6'];
             const answers = {};
             let allAnswered = true;
@@ -311,10 +358,10 @@
                 return;
             }
 
-            // Get comment
+            // 3. Get comment
             const comment = document.getElementById('comment').value.trim();
 
-            // Build data object
+            // 4. Build data object (EXACTLY like the test function expects)
             const data = {
                 class: selectedClass,
                 questions: {
@@ -328,37 +375,81 @@
                 comment: comment || '(no comment)'
             };
 
-            console.log('📤 Sending data:', data);
+            console.log('📤 Sending data:', JSON.stringify(data, null, 2));
             console.log('📤 To URL:', WEB_APP_URL);
 
-            // Disable submit button
+            // 5. Disable submit button
             const submitBtn = form.querySelector('.submit-btn');
             submitBtn.disabled = true;
             submitBtn.textContent = '⏳ Sending...';
 
-            // Try using fetch with no-cors (this is the important part)
+            // 6. Send data using fetch with proper CORS handling
             fetch(WEB_APP_URL, {
                 method: 'POST',
-                mode: 'no-cors',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify(data)
             })
-            .then(() => {
-                // With no-cors, we can't read the response, but the request was sent
-                console.log('✅ Request sent successfully');
-                alert('✅ Survey submitted successfully! Thank you for your feedback.');
-                form.reset();
+            .then(response => {
+                console.log('📥 Response status:', response.status);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(result => {
+                console.log('✅ Success response:', result);
+                if (result.success) {
+                    successMessage.style.display = 'block';
+                    form.reset();
+                } else {
+                    errorMessage.textContent = '❌ Error: ' + (result.error || 'Unknown error');
+                    errorMessage.style.display = 'block';
+                }
                 submitBtn.disabled = false;
                 submitBtn.textContent = '📩 Submit Survey';
             })
             .catch((error) => {
-                console.error('❌ Error:', error);
-                alert('❌ Error submitting survey. Please try again.\n\nError: ' + error.message);
-                submitBtn.disabled = false;
-                submitBtn.textContent = '📩 Submit Survey';
+                console.error('❌ Fetch error:', error);
+                
+                // If CORS error, try with no-cors as fallback
+                if (error.message.includes('CORS') || error.message.includes('fetch')) {
+                    console.log('🔄 Trying no-cors mode as fallback...');
+                    
+                    fetch(WEB_APP_URL, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(data)
+                    })
+                    .then(() => {
+                        // With no-cors, we can't read the response, but the request was sent
+                        console.log('✅ Request sent with no-cors');
+                        successMessage.style.display = 'block';
+                        form.reset();
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = '📩 Submit Survey';
+                    })
+                    .catch((fallbackError) => {
+                        console.error('❌ Fallback error:', fallbackError);
+                        errorMessage.textContent = '❌ Error: ' + fallbackError.message;
+                        errorMessage.style.display = 'block';
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = '📩 Submit Survey';
+                    });
+                } else {
+                    errorMessage.textContent = '❌ Error: ' + error.message;
+                    errorMessage.style.display = 'block';
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = '📩 Submit Survey';
+                }
             });
         });
     })();
 </script>
+
+</body>
+</html>
