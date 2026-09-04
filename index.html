@@ -271,7 +271,7 @@
         // ============================================================
         // 🔑 REPLACE THIS URL WITH YOUR ACTUAL WEB APP URL
         // ============================================================
-        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzaDNreca2kk4h9CXUKeOAo4gAyhLdbIsN9X1A2UGHnQ5e20JUF_EKhEYpsF-5iXK6H/exec';
+        const WEB_APP_URL = 'https://script.google.com/macros/s/YOUR-ACTUAL-URL/exec';
         // ============================================================
 
         form.addEventListener('submit', function(e) {
@@ -328,75 +328,37 @@
                 comment: comment || '(no comment)'
             };
 
-            // Log the data to console for debugging
             console.log('📤 Sending data:', data);
             console.log('📤 To URL:', WEB_APP_URL);
 
-            // Send data to Google Sheets
+            // Disable submit button
             const submitBtn = form.querySelector('.submit-btn');
             submitBtn.disabled = true;
             submitBtn.textContent = '⏳ Sending...';
 
-            // Try using fetch without no-cors first
+            // Try using fetch with no-cors (this is the important part)
             fetch(WEB_APP_URL, {
                 method: 'POST',
-                mode: 'cors', // Changed from 'no-cors' to 'cors'
+                mode: 'no-cors',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify(data)
             })
-            .then(response => {
-                console.log('📥 Response status:', response.status);
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(result => {
-                console.log('✅ Success:', result);
-                if (result.success) {
-                    alert('✅ Survey submitted successfully! Thank you for your feedback.');
-                    form.reset();
-                } else {
-                    alert('❌ Error: ' + (result.error || 'Unknown error occurred'));
-                }
+            .then(() => {
+                // With no-cors, we can't read the response, but the request was sent
+                console.log('✅ Request sent successfully');
+                alert('✅ Survey submitted successfully! Thank you for your feedback.');
+                form.reset();
                 submitBtn.disabled = false;
                 submitBtn.textContent = '📩 Submit Survey';
             })
             .catch((error) => {
-                console.error('❌ Fetch error:', error);
-                
-                // If CORS error, try with no-cors as fallback
-                if (error.message.includes('CORS')) {
-                    console.log('🔄 Trying with no-cors mode...');
-                    fetch(WEB_APP_URL, {
-                        method: 'POST',
-                        mode: 'no-cors',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(data)
-                    })
-                    .then(() => {
-                        alert('✅ Survey submitted successfully! (No response data available)');
-                        form.reset();
-                        submitBtn.disabled = false;
-                        submitBtn.textContent = '📩 Submit Survey';
-                    })
-                    .catch((fallbackError) => {
-                        alert('❌ Error submitting survey. Please try again.\n\nError: ' + fallbackError.message);
-                        submitBtn.disabled = false;
-                        submitBtn.textContent = '📩 Submit Survey';
-                    });
-                } else {
-                    alert('❌ Error submitting survey. Please try again.\n\nError: ' + error.message);
-                    submitBtn.disabled = false;
-                    submitBtn.textContent = '📩 Submit Survey';
-                }
+                console.error('❌ Error:', error);
+                alert('❌ Error submitting survey. Please try again.\n\nError: ' + error.message);
+                submitBtn.disabled = false;
+                submitBtn.textContent = '📩 Submit Survey';
             });
         });
     })();
 </script>
-</body>
-</html>
